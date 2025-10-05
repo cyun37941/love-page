@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>给你的一封表白信</title>
+  <meta name="description" content="这是为你定制的表白页面 — 有音乐、飘花瓣、打字机、烟花和密码保护。" />
+  <!-- 微信/社交预览 -->
+  <meta property="og:title" content="给你的一封表白信" />
+  <meta property="og:description" content="点开看惊喜，有专属音乐与动画。" />
+  <meta property="og:image" content="/images/preview.jpg" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <style>
+    /* Reset + 基础 */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family: -apple-system,BlinkMacSystemFont,"Helvetica Neue",Segoe UI,Roboto,"PingFang SC","Hiragino Sans GB","Microsoft Yahei",arial}
+    body{background:linear-gradient(180deg,#0b1020 0%,#17182a 60%);color:#fff;overflow:hidden}
+
+    /* 中心卡片 */
+    .wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{width:100%;max-width:780px;background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:18px;padding:28px;backdrop-filter: blur(6px);box-shadow:0 10px 40px rgba(2,8,23,0.6);position:relative;overflow:hidden}
+
+    h1{font-size:28px;margin-bottom:6px;letter-spacing:1px}
+    .subtitle{opacity:0.8;margin-bottom:18px}
+
+    /* 打字机 */
+    .typewriter{font-size:18px;line-height:1.6;min-height:88px}
+    .cursor{display:inline-block;width:2px;height:1em;background:#ffccd5;margin-left:6px;vertical-align:middle;animation:blink 1s steps(2,end) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    /* 控制按钮 */
+    .controls{display:flex;gap:10px;margin-top:18px}
+    .btn{padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.04);cursor:pointer;font-weight:600}
+
+    /* 心形 */
+    .heart{position:absolute;right:26px;top:20px;width:64px;height:64px;transform:scale(0.9);animation:beat 1s ease-in-out infinite}
+    .heart:before,.heart:after{content:'';position:absolute;left:32px;top:0;width:32px;height:48px;background:#ff5a7a;border-radius:32px 32px 0 0;transform-origin:0 100%}
+    .heart:after{left:0;transform:rotate(-45deg)}
+    .heart:before{left:32px;transform:rotate(45deg)}
+    @keyframes beat{0%,100%{transform:scale(0.9)}50%{transform:scale(1.05)}}
+
+    /* 飘花瓣 */
+    .petal{position:fixed;top:-10vh;left:50%;width:18px;height:18px;background:radial-gradient(circle at 30% 30%,#fff7f9 0,#ffb6c1 60%);opacity:0.9;border-radius:45%/55%;transform:rotate(20deg);pointer-events:none;z-index:6}
+
+    /* 烟花画布 */
+    #fireworks{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3}
+
+    /* 密码模态 */
+    .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.6),rgba(2,6,23,0.85));display:flex;align-items:center;justify-content:center;z-index:20}
+    .modal{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));padding:26px;border-radius:12px;width:94%;max-width:420px;text-align:center}
+    .modal input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff;margin-top:12px}
+
+    /* 音乐控制 */
+    .music-btn{position:fixed;left:18px;bottom:18px;z-index:30;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06)}
+
+    /* 分享提示 */
+    .share-tip{position:fixed;left:50%;transform:translateX(-50%);bottom:80px;background:rgba(0,0,0,0.6);padding:10px 14px;border-radius:999px;font-size:14px;z-index:30}
+
+    /* 响应 */
+    @media(max-width:520px){h1{font-size:22px}.card{padding:18px}}
+  </style>
+</head>
+<body>
+  <div id="app" class="wrap">
+    <div class="card">
+      <div class="heart" title="❤"></div>
+      <h1 id="title">亲爱的 ——</h1>
+      <div class="subtitle">点下方按钮，开始属于我们的惊喜</div>
+      <div class="typewriter" id="typewriter"></div>
+
+      <div class="controls">
+        <button class="btn" id="replay">重新播放打字</button>
+        <button class="btn" id="fire">放烟花</button>
+        <button class="btn" id="share">分享（长按复制链接）</button>
+      </div>
+
+      <!-- 可替换图片/头像展示区 -->
+      <div style="margin-top:18px;display:flex;gap:12px;align-items:center">
+        <img id="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='86' height='86'><rect width='100%' height='100%' fill='%23ffdfe6' rx='12'/></svg>" alt="avatar" style="width:86px;height:86px;border-radius:14px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)">
+        <div style="flex:1">
+          <div style="font-weight:700">[你的名字]</div>
+          <div style="opacity:0.75;font-size:14px;margin-top:6px">特别为你准备的页面 · 记得点音乐 ☺</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 烟花画布 -->
+  <canvas id="fireworks"></canvas>
+  <!-- 密码覆盖层（初始启用） -->
+  <div id="overlay" class="overlay">
+    <div class="modal">
+      <h3>这是给你的密语</h3>
+      <p style="opacity:0.8">输入密码查看（默认密码：520）</p>
+      <input id="pwd" placeholder="输入四位密码" maxlength="12" />
+      <button id="unlock" class="btn" style="margin-top:12px">解锁并进入</button>
+      <div style="margin-top:10px;font-size:12px;opacity:0.7">没有密码？发送暗号给我，我们私下说明 💌</div>
+    </div>
+  </div>
+
+  <!-- 音乐（把src替换为你上传的mp3链接） -->
+  <audio id="bgm" loop preload="auto" src="https://cdn.jsdelivr.net/gh/terrytangyuan/samples/music-lovely.mp3"></audio>
+  <button id="musicBtn" class="music-btn">播放音乐 ▶</button>
+  <div id="shareTip" class="share-tip" style="display:none">已复制到剪贴板，发送给TA吧！</div>
+
+  <script>
+    /***** 配置区（请按需修改） *****/
+    const CONF = {
+      receiverName: '最爱的你', // 展示在标题
+      avatar: '', // 若不为空，替换头像URL
+      password: '520', // 初始查看密码
+      typingLines: [
+        '第一次见到你，我以为只是风景，后来才知道你是整个世界。',
+        '你笑起来的样子，是我每天都想看到的阳光。',
+        '愿意和我一起看日出，看大雨中的街道，看电影到凌晨吗？',
+        '我喜欢你，很久很久了。'
+      ],
+      musicAutoPlay: false // 移动端浏览器常会阻止自动播放，保留手动按钮
+    }
+
+    // 应用配置
+    document.getElementById('title').innerText = CONF.receiverName + '，你好';
+    if(CONF.avatar) document.getElementById('avatar').src = CONF.avatar;
+
+    // 密码解锁
+    const overlay = document.getElementById('overlay');
+    document.getElementById('unlock').addEventListener('click', ()=>{
+      const v = document.getElementById('pwd').value.trim();
+      if(v === CONF.password){ overlay.style.display='none'; startAll(); }
+      else { alert('密码错误，试试520吧 😉'); }
+    });
+
+    // 打字机效果
+    const typeEl = document.getElementById('typewriter');
+    let typingIndex=0, charIndex=0;
+    function typeOnce(lines,cb){
+      if(typingIndex>=lines.length){ cb&&cb(); return }
+      const line = lines[typingIndex];
+      charIndex=0; typeEl.innerHTML='';
+      const cur = document.createElement('div'); typeEl.appendChild(cur);
+      const cdiv = document.createElement('span'); cur.appendChild(cdiv);
+      const cursor = document.createElement('span'); cursor.className='cursor'; cur.appendChild(cursor);
+      const t = setInterval(()=>{
+        cdiv.innerText = line.slice(0, ++charIndex);
+        if(charIndex>=line.length){ clearInterval(t); typingIndex++; setTimeout(()=>typeOnce(lines,cb),700) }
+      }, 48);
+    }
+    document.getElementById('replay').addEventListener('click', ()=>{ typingIndex=0; typeOnce(CONF.typingLines); })
+
+    // 背景花瓣随机生成
+    function spawnPetal(){
+      const p = document.createElement('div'); p.className='petal';
+      document.body.appendChild(p);
+      const startX = Math.random()*100; p.style.left = startX+'%';
+      const scale = 0.6 + Math.random()*0.9; p.style.transform = 'scale('+scale+') rotate('+Math.random()*360+'deg)';
+      const duration = 8000 + Math.random()*9000;
+      p.animate([
+        {transform: p.style.transform, top:'-10vh', opacity:1},
+        {transform: 'translateX('+((Math.random()-0.5)*40)+'vw) rotate('+ (Math.random()*720-360) +'deg)', top:'110vh', opacity:0.6}
+      ],{duration:duration, easing:'linear'});
+      setTimeout(()=>p.remove(), duration+200);
+    }
+
+    // 周期生成
+    let petalTimer;
+    function startPetals(){ petalTimer = setInterval(spawnPetal,420); }
+    function stopPetals(){ clearInterval(petalTimer); }
+
+    // 背景音乐控制
+    const bgm = document.getElementById('bgm'); const musicBtn=document.getElementById('musicBtn');
+    musicBtn.addEventListener('click', ()=>{
+      if(bgm.paused){ bgm.play().catch(()=>{}); musicBtn.innerText='暂停音乐 ⏸' }
+      else { bgm.pause(); musicBtn.innerText='播放音乐 ▶' }
+    });
+
+    // 分享复制链接（微信环境里长按会显示转发）
+    document.getElementById('share').addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(location.href); const tip=document.getElementById('shareTip'); tip.style.display='block'; setTimeout(()=>tip.style.display='none',1800);}catch(e){alert('复制失败，请手动长按链接复制')}
+    });
+
+    // 烟花（简单实现）
+    const c = document.getElementById('fireworks'); const ctx = c.getContext('2d');
+    function resizeCanvas(){c.width = innerWidth; c.height = innerHeight}
+    addEventListener('resize', resizeCanvas); resizeCanvas();
+
+    // 烟花粒子系统（简化）
+    let particles=[];
+    function spawnFirework(x,y){
+      const power = 40 + Math.random()*60;
+      const count = 20 + Math.floor(Math.random()*30);
+      for(let i=0;i<count;i++){
+        const ang = Math.random()*Math.PI*2; const speed = power*(0.2+Math.random()*0.9);
+        particles.push({x,y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,life:60+Math.random()*40,color:`hsl(${Math.floor(Math.random()*360)},80%,60%)`});
+      }
+    }
+    function updateFireworks(){
+      ctx.clearRect(0,0,c.width,c.height);
+      for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i]; p.x+=p.vx*0.12; p.y+=p.vy*0.12; p.vy+=0.6; p.life--;
+        ctx.globalAlpha = Math.max(0,p.life/80);
+        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y, Math.max(1,p.life/12),0,Math.PI*2); ctx.fill();
+        if(p.life<=0) particles.splice(i,1);
+      }
+      requestAnimationFrame(updateFireworks);
+    }
+    updateFireworks();
+    document.getElementById('fire').addEventListener('click', ()=>{ spawnFirework(innerWidth*0.5, innerHeight*0.3); spawnFirework(innerWidth*0.3, innerHeight*0.5); spawnFirework(innerWidth*0.7, innerHeight*0.5); });
+
+    // 开始全部效果
+    function startAll(){ startPetals(); typingIndex=0; typeOnce(CONF.typingLines); if(CONF.musicAutoPlay) bgm.play().catch(()=>{}); }
+
+    // 页面首次载入：保持密码覆盖层，除非密码为空
+    if(!CONF.password){ overlay.style.display='none'; startAll() }
+
+    // 自动解锁示例（按回车）
+    document.getElementById('pwd').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('unlock').click() })
+
+    // 点击页面任意位置启动音乐（移动端友好启动）
+    let oneTap = false; document.body.addEventListener('click', ()=>{ if(!oneTap){ oneTap=true; if(CONF.musicAutoPlay) bgm.play().catch(()=>{}); } },{once:true})
+
+    // 页面加载完简单进场动画
+    window.addEventListener('load', ()=>{ document.querySelector('.card').animate([{transform:'translateY(20px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:700,easing:'cubic-bezier(.2,.9,.3,1)'}); });
+
+    // 方便开发者：控制台打印快捷修改说明
+    console.log('配置在 CONF 对象里：receiverName, avatar, password, typingLines, musicAutoPlay');
+  </script>
+</body>
+</html>
